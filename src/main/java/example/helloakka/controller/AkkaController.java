@@ -5,13 +5,10 @@ import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
 import akka.cluster.typed.Cluster;
-import com.clovirvdi.domain.vsphere.entity.VCenterResource;
-import com.clovirvdi.sddc.vsphere.client.VSphereClient;
 import example.helloakka.actor.distributeddata.Counter;
 import example.helloakka.actor.distributeddata.ORSetActor;
 import example.helloakka.cluster.AkkaClusterManager;
 import example.helloakka.controller.dto.ClusterMember;
-import example.helloakka.vsphere.Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,8 +33,6 @@ public class AkkaController {
 
     @GetMapping("/members")
     public List<ClusterMember> members() {
-        VSphereClient client = Client.getClient();
-        List<VCenterResource> clusters = client.cluster().getClusters();
         String leader = cluster.state().getLeader().toString();
         return akkaClusterManager.getNodes().stream()
                 .map(m -> ClusterMember.of(m.address().toString(), m.status().toString(), leader))
