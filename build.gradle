@@ -22,7 +22,6 @@ repositories {
 }
 
 dependencies {
-    implementation files('libs/clovirvdi-vsphere-fat.jar')
 
     implementation group: 'com.typesafe.akka', name: 'akka-cluster-typed_3', version: "${akkaVersion}"
     implementation group: 'com.typesafe.akka', name: 'akka-actor-typed_3', version: "${akkaVersion}"
