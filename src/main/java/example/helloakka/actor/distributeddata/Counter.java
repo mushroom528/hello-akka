@@ -12,8 +12,12 @@ import akka.cluster.ddata.SelfUniqueAddress;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
 import akka.cluster.ddata.typed.javadsl.Replicator;
 import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
+import lombok.Getter;
 
 public class Counter extends AbstractBehavior<Counter.Command> {
+
+    private CounterCache cache;
+
     public interface Command {
     }
 
@@ -44,12 +48,12 @@ public class Counter extends AbstractBehavior<Counter.Command> {
     private record InternalSubscribeResponse(Replicator.SubscribeResponse<GCounter> rsp) implements InternalCommand {
     }
 
-    public static Behavior<Command> create(Key<GCounter> key) {
+    public static Behavior<Command> create(Key<GCounter> key, CounterCache cache) {
         return Behaviors.setup(
                 ctx ->
                         DistributedData.withReplicatorMessageAdapter(
                                 (ReplicatorMessageAdapter<Command, GCounter> replicatorAdapter) ->
-                                        new Counter(ctx, replicatorAdapter, key)));
+                                        new Counter(ctx, replicatorAdapter, key, cache)));
     }
 
     // adapter that turns the response messages from the replicator into our own protocol
@@ -57,21 +61,20 @@ public class Counter extends AbstractBehavior<Counter.Command> {
     private final SelfUniqueAddress node;
     private final Key<GCounter> key;
 
+    @Getter
     private int cachedValue = 0;
 
     private Counter(
             ActorContext<Command> context,
             ReplicatorMessageAdapter<Command, GCounter> replicatorAdapter,
-            Key<GCounter> key) {
+            Key<GCounter> key, CounterCache cache) {
         super(context);
 
         this.replicatorAdapter = replicatorAdapter;
         this.key = key;
-
-        final SelfUniqueAddress node = DistributedData.get(context.getSystem()).selfUniqueAddress();
+        this.cache = cache;
 
         this.node = DistributedData.get(context.getSystem()).selfUniqueAddress();
-
         this.replicatorAdapter.subscribe(this.key, InternalSubscribeResponse::new);
     }
 
@@ -137,6 +140,7 @@ public class Counter extends AbstractBehavior<Counter.Command> {
 
             GCounter counter = ((Replicator.Changed<GCounter>) msg.rsp).get(key);
             cachedValue = counter.getValue().intValue();
+            cache.cachedValue = counter.getValue().intValue();
             getContext().getLog().info("데이터 변경: {}", cachedValue);
             return this;
         } else {

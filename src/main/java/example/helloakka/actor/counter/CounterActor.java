@@ -14,7 +14,7 @@ public class CounterActor extends AbstractBehavior<CounterActor.Command> {
     public interface Command {
     }
 
-    public record IncrementCounter(Long id, int value) implements Command {
+    public record IncrementCount(Long id, int value) implements Command {
     }
 
     public static Behavior<Command> create(CounterRepository counterRepository) {
@@ -31,11 +31,11 @@ public class CounterActor extends AbstractBehavior<CounterActor.Command> {
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
-                .onMessage(IncrementCounter.class, this::onIncrementCounter)
+                .onMessage(IncrementCount.class, this::onIncrementCount)
                 .build();
     }
 
-    private Behavior<Command> onIncrementCounter(IncrementCounter command) {
+    private Behavior<Command> onIncrementCount(IncrementCount command) {
         counterRepository.findById(command.id).ifPresent(counter -> {
             counter.plus(command.value());
             counterRepository.save(counter);

@@ -2,6 +2,7 @@ package example.helloakka.service;
 
 import example.helloakka.domain.count.Counter;
 import example.helloakka.domain.count.CounterRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CounterServiceTest {
 
     @Autowired
-    private CounterServiceV2 counterService;
+    private CounterService counterService;
     @Autowired
     private CounterRepository counterRepository;
     private Counter counter;
@@ -27,6 +29,11 @@ class CounterServiceTest {
     void setup() {
         counter = Counter.of("test");
         counterRepository.saveAndFlush(counter);
+    }
+
+    @AfterEach
+    void clear() {
+        counterRepository.delete(counter);
     }
 
     @Test
@@ -38,7 +45,7 @@ class CounterServiceTest {
                 counterService.plus(counter.getId(), 1);
             });
         }
-        Thread.sleep(1000);
+        TimeUnit.SECONDS.sleep(1);
 
         Optional<Counter> result = counterRepository.findById(counter.getId());
 

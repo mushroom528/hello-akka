@@ -6,6 +6,7 @@ import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
 import akka.cluster.typed.Cluster;
 import example.helloakka.actor.distributeddata.Counter;
+import example.helloakka.actor.distributeddata.CounterCache;
 import example.helloakka.actor.distributeddata.ORSetActor;
 import example.helloakka.cluster.AkkaClusterManager;
 import example.helloakka.controller.dto.ClusterMember;
@@ -30,6 +31,7 @@ public class AkkaController {
     private final ActorRef<ORSetActor.Command> orSetActor;
     private final ActorSystem<Void> actorSystem;
     private final Cluster cluster;
+    private final CounterCache cache;
 
     @GetMapping("/members")
     public List<ClusterMember> members() {
@@ -63,6 +65,22 @@ public class AkkaController {
                 actorSystem.scheduler()
         );
         return ask.toCompletableFuture();
+    }
+
+    @GetMapping("/cache/value")
+    public CompletableFuture<Integer> cache() {
+        CompletionStage<Integer> ask = AskPattern.ask(
+                counter,
+                Counter.GetCachedValue::new,
+                Duration.ofSeconds(3),
+                actorSystem.scheduler()
+        );
+        return ask.toCompletableFuture();
+    }
+
+    @GetMapping("/v2/cache/value")
+    public int cacheV2() {
+        return cache.getCachedValue();
     }
 
 }

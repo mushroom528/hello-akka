@@ -14,6 +14,6 @@ public class CounterServiceV2 {
 
     @Transactional
     public void plus(Long id, int value) {
-        counterActor.tell(new CounterActor.IncrementCounter(id, value));
+        counterActor.tell(new CounterActor.IncrementCount(id, value));
     }
 }
