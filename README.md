@@ -6,3 +6,6 @@
 
 ## Akka Cluster
 - [Akka Cluster](https://github.com/mushroom528/TIL/blob/master/Akka/cluster.md)
+
+## Akka Distributed Data
+- [Akka Distributed Data](https://github.com/mushroom528/TIL/blob/master/Akka/distributed_data.md)
